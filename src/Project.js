@@ -27,6 +27,8 @@ const RadialGradient = require('./RadialGradient');
 const GradientStop = require('./GradientStop');
 const TrimPath = require('./TrimPath');
 const riveMap = require('./helpers/riveMap');
+const Component = require('./Component');
+const componentKeys = require('./helpers/componentKeys');
 
 class Project {
   constructor(reader) {
@@ -225,14 +227,19 @@ class Project {
         if (this._objectFactories[objectType]) {
           this._objectFactories[objectType](reader);
         } else if (objectType !== 0) {
-          while (!reader.isEOF()) {
-            const propCode = reader.readVarUint();
-            if (propCode === 0) {
-              break;
-            }
-            const binaryType = riveMap[propCode];
-            if (binaryType !== undefined) {
-              reader.skipProperty(binaryType);
+          if (componentKeys.has(objectType)) {
+            const dummy = Object.seal(new Component(reader));
+            this.lastObjects.artboard.addChild(dummy);
+          } else {
+            while (!reader.isEOF()) {
+              const propCode = reader.readVarUint();
+              if (propCode === 0) {
+                break;
+              }
+              const binaryType = riveMap[propCode];
+              if (binaryType !== undefined) {
+                reader.skipProperty(binaryType);
+              }
             }
           }
         }

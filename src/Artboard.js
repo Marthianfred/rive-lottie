@@ -27,9 +27,9 @@ class Artboard extends Component {
   }
 
   addChild(child) {
-    // eslint-disable-next-line no-param-reassign
-    child.id = this._children.length;
-    this._children.push(child);
+    const target = child;
+    target.id = this._children.length;
+    this._children.push(target);
   }
 
   addAnimation(animation) {
@@ -85,10 +85,15 @@ class Artboard extends Component {
   _resolveParenting() {
     const children = this._children;
     children.forEach((child) => {
-      if (child.parentId && children[child.parentId] && typeof children[child.parentId].addChild === 'function') {
-        // eslint-disable-next-line no-param-reassign
-        child.parent = children[child.parentId];
-        children[child.parentId].addChild(child);
+      if (child.parentId !== undefined && child.parentId !== null) {
+        const parent = children[child.parentId];
+        if (parent) {
+          const target = child;
+          target.parent = parent;
+          if (child.parentId !== 0 && typeof parent.addChild === 'function') {
+            parent.addChild(target);
+          }
+        }
       }
     });
   }

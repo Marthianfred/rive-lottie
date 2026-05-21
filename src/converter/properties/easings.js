@@ -1,11 +1,4 @@
-// eslint-disable-next-line no-unused-vars
-const easingTypes = {
-  IN_OUT: 'in-out',
-  IN_OUT_ONE_DIMENSIONS: 'in-out-one-dimension',
-};
-
 const inOutEasing = (keyframe) => {
-  // TODO: implement hold heyframes
   if (keyframe.interpolationType === 1) {
     return {
       o: {
@@ -17,18 +10,21 @@ const inOutEasing = (keyframe) => {
         y: 0.833,
       },
     };
-  } if (keyframe.interpolationType === 2) {
+  }
+  if (keyframe.interpolationType === 2) {
     const { interpolator } = keyframe;
-    return {
-      o: {
-        x: interpolator.x1,
-        y: interpolator.y1,
-      },
-      i: {
-        x: interpolator.x2,
-        y: interpolator.y2,
-      },
-    };
+    if (interpolator && typeof interpolator.x1 === 'number') {
+      return {
+        o: {
+          x: interpolator.x1,
+          y: interpolator.y1,
+        },
+        i: {
+          x: interpolator.x2,
+          y: interpolator.y2,
+        },
+      };
+    }
   }
   return {
     o: {
@@ -43,7 +39,6 @@ const inOutEasing = (keyframe) => {
 };
 
 const inOutOneDimensionEasing = (keyframe) => {
-  // TODO: implement hold heyframes
   if (keyframe.interpolationType === 1) {
     return {
       o: {
@@ -55,18 +50,21 @@ const inOutOneDimensionEasing = (keyframe) => {
         y: [0.833],
       },
     };
-  } if (keyframe.interpolationType === 2) {
+  }
+  if (keyframe.interpolationType === 2) {
     const { interpolator } = keyframe;
-    return {
-      o: {
-        x: [interpolator.x1],
-        y: [interpolator.y1],
-      },
-      i: {
-        x: [interpolator.x2],
-        y: [interpolator.y2],
-      },
-    };
+    if (interpolator && typeof interpolator.x1 === 'number') {
+      return {
+        o: {
+          x: [interpolator.x1],
+          y: [interpolator.y1],
+        },
+        i: {
+          x: [interpolator.x2],
+          y: [interpolator.y2],
+        },
+      };
+    }
   }
   return {
     o: {
