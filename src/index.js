@@ -28,9 +28,9 @@ async function build(buffer) {
     const project = new Project(reader);
     project.searchArtboards();
     const animations = createAnimations(project);
+    const riveFile = riveModule.load(new Uint8Array(buffer));
+    const artboard = riveFile.defaultArtboard();
     const animationsData = animations.map((animation, index) => {
-      const riveFile = riveModule.load(new Uint8Array(buffer));
-      const artboard = riveFile.defaultArtboard();
       const riveAnimation = artboard.animationByIndex(index);
       const animationInstance = riveModule.loadLinearAnimation(riveAnimation);
       return animation.serialize({

@@ -16,7 +16,7 @@ const nullFactory = (nullElement, parentId) => {
     // eslint-disable-next-line no-use-before-define
     (child) => createLayersFromElement(child, lottieObject.id),
   );
-  return [lottieObject, children.flat()].flat();
+  return [lottieObject, children.flat()].flat().filter(Boolean);
 };
 
 const layerCreators = {

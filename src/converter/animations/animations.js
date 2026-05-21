@@ -184,6 +184,7 @@ const handleOpacity = (keyframes, lottieObject) => {
 
 const setAnimatedProperties = (properties, objectId, lottie) => {
   const lottieObject = lottie.getObjectById(objectId);
+  if (!lottieObject) return;
   properties.forEach((animatedProperty) => {
     const { keyframes } = animatedProperty;
     if (animatedProperty.propertyKey === 13) {

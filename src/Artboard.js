@@ -85,9 +85,7 @@ class Artboard extends Component {
   _resolveParenting() {
     const children = this._children;
     children.forEach((child) => {
-      // console.log(child.name,'[--]',child.type,'[--]',child.id)
-      if (child.parentId) {
-        // console.log('parent: ',children[child.parentId].type, '; id: ', child.parentId);
+      if (child.parentId && children[child.parentId] && typeof children[child.parentId].addChild === 'function') {
         // eslint-disable-next-line no-param-reassign
         child.parent = children[child.parentId];
         children[child.parentId].addChild(child);

@@ -60,6 +60,7 @@ const addElements = (lottieAnimations, artboard) => {
       lottie.addLayer(preComp);
       const layers = createLayersFromElement(element);
       layers
+        .filter(Boolean)
         .forEach((layer) => {
           preComp.addLayer(layer);
         });
