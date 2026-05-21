@@ -24,13 +24,19 @@ const createLottieAnimations = (artboard) => {
   for (let i = 0; i < totalAnimations; i += 1) {
     const lottieAnimation = new LottieAnimation(artboard.width, artboard.height);
     if (artboard.animations[i]) {
-      lottieAnimation.frameRate = artboard.animations[i].fps;
-      if (artboard.animations[i].workStart !== -1) {
-        lottieAnimation.inPoint = artboard.animations[i].workStart;
+      const anim = artboard.animations[i];
+      lottieAnimation.frameRate = anim.fps;
+      if (anim.enableWorkArea) {
+        if (anim.workStart !== -1) {
+          lottieAnimation.inPoint = anim.workStart;
+        }
+        lottieAnimation.outPoint = anim.workEnd === -1
+          ? anim.duration
+          : anim.workEnd;
+      } else {
+        lottieAnimation.inPoint = 0;
+        lottieAnimation.outPoint = anim.duration;
       }
-      lottieAnimation.outPoint = artboard.animations[i].workEnd === -1
-        ? artboard.animations[i].duration
-        : artboard.animations[i].workEnd;
     }
     animations.push(lottieAnimation);
   }
@@ -55,8 +61,10 @@ const createLayersFromElement = (element, width, height) => {
 const addElements = (lottieAnimations, artboard) => {
   const rootElements = getRootElements(artboard.children);
   lottieAnimations.forEach((lottie) => {
+    let preCompId = 20000;
     rootElements.forEach((element) => {
-      const preComp = new LottiePreComp('', artboard.width, artboard.height);
+      const preComp = new LottiePreComp(preCompId, artboard.width, artboard.height);
+      preCompId += 1;
       lottie.addLayer(preComp);
       const layers = createLayersFromElement(element);
       layers
@@ -69,6 +77,7 @@ const addElements = (lottieAnimations, artboard) => {
 };
 
 const createAnimationsFromArtboard = (artboard) => {
+  LottiePreComp.refIdCount = 0;
   const lottieAnimations = createLottieAnimations(artboard);
   addElements(lottieAnimations, artboard);
   addAnimations(lottieAnimations, artboard);

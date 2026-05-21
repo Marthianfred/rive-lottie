@@ -22,6 +22,10 @@ class LinearAnimation extends Animation {
     return this._workEnd;
   }
 
+  get enableWorkArea() {
+    return this._enableWorkArea;
+  }
+
   addObject(keyedObject) {
     this._objects.push(keyedObject);
   }
@@ -68,7 +72,6 @@ class LinearAnimation extends Animation {
 
   _setEnableWorkArea(reader) {
     this._enableWorkArea = bool(reader);
-    // TODO implement with readByte
   }
 
   _registerPropertyHandlers() {
