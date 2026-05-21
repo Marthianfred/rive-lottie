@@ -1,3 +1,5 @@
+const riveMap = require('./helpers/riveMap');
+
 class RiveObject extends Object {
   constructor(reader) {
     super();
@@ -10,16 +12,22 @@ class RiveObject extends Object {
   _iterateProperties(reader) {
     while (!reader.isEOF()) {
       const value = reader.readVarUint();
-      // console.log('value', value);
       if (value === 0) {
         break;
       } else if (this._properties[value]) {
+        const before = reader.readIndex;
         this._properties[value](reader);
+        if (reader.readIndex === before) {
+          const binaryType = riveMap[value];
+          if (binaryType !== undefined) {
+            reader.skipProperty(binaryType);
+          }
+        }
       } else {
-        // eslint-disable-next-line no-console
-        console.log('UNHANDLED PROP: ', value);
-        // eslint-disable-next-line no-console
-        console.log('', this.constructor.name);
+        const binaryType = riveMap[value];
+        if (binaryType !== undefined) {
+          reader.skipProperty(binaryType);
+        }
       }
     }
   }

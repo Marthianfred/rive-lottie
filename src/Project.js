@@ -26,6 +26,7 @@ const LinearGradient = require('./LinearGradient');
 const RadialGradient = require('./RadialGradient');
 const GradientStop = require('./GradientStop');
 const TrimPath = require('./TrimPath');
+const riveMap = require('./helpers/riveMap');
 
 class Project {
   constructor(reader) {
@@ -223,18 +224,22 @@ class Project {
         const objectType = reader.readVarUint();
         if (this._objectFactories[objectType]) {
           this._objectFactories[objectType](reader);
-        } else if (objectType === 0) {
-          // eslint-disable-next-line no-console
-          console.log('END OBJECT');
-        } else {
-          // eslint-disable-next-line no-console
-          console.log('INDEX objectType', objectType);
+        } else if (objectType !== 0) {
+          while (!reader.isEOF()) {
+            const propCode = reader.readVarUint();
+            if (propCode === 0) {
+              break;
+            }
+            const binaryType = riveMap[propCode];
+            if (binaryType !== undefined) {
+              reader.skipProperty(binaryType);
+            }
+          }
         }
       }
       this.resolveArtboard();
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.log(err);
+      console.error(err);
     }
   }
 
