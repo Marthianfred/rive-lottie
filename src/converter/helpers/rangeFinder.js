@@ -1,10 +1,33 @@
-const compareValues = (val1, val2) => JSON.stringify(val1) === JSON.stringify(val2);
+const fastCompare = (val1, val2) => {
+  if (val1 === val2) return true;
+  if (val1 === null || val2 === null || typeof val1 !== 'object' || typeof val2 !== 'object') {
+    return false;
+  }
+  if (Array.isArray(val1)) {
+    if (!Array.isArray(val2) || val1.length !== val2.length) return false;
+    for (let i = 0; i < val1.length; i += 1) {
+      if (!fastCompare(val1[i], val2[i])) return false;
+    }
+    return true;
+  }
+  if (Array.isArray(val2)) return false;
+  const keys1 = Object.keys(val1);
+  const keys2 = Object.keys(val2);
+  if (keys1.length !== keys2.length) return false;
+  for (let i = 0; i < keys1.length; i += 1) {
+    const key = keys1[i];
+    if (!Object.prototype.hasOwnProperty.call(val2, key) || !fastCompare(val1[key], val2[key])) {
+      return false;
+    }
+  }
+  return true;
+};
 
 const findInterpolatingProperty = (ranges, keyframeNumbers, currentRangeIndex, propertyIndex) => {
   let lowerIndex = currentRangeIndex;
   let upperIndex = currentRangeIndex + 1;
-  let lowerKeyframeValue; let
-    upperKeyframeValue;
+  let lowerKeyframeValue;
+  let upperKeyframeValue;
   while (lowerIndex >= 0) {
     const keyframe = keyframeNumbers[ranges[lowerIndex]];
     const prop = keyframe.find((propCandidate) => propCandidate.propertyIndex === propertyIndex);
@@ -27,7 +50,7 @@ const findInterpolatingProperty = (ranges, keyframeNumbers, currentRangeIndex, p
     return false;
   }
 
-  return !(compareValues(lowerKeyframeValue.keyframe.s, upperKeyframeValue.keyframe.s));
+  return !fastCompare(lowerKeyframeValue.keyframe.s, upperKeyframeValue.keyframe.s);
 };
 
 const findMissingIndexes = (initKeyframeData, endKeyframeData, totalProperties) => Array
@@ -61,11 +84,11 @@ const findInterpolatingProperties = (
 };
 
 const areInterpolationsEqual = (properties) => {
-  const lastI = JSON.stringify(properties[0].keyframe.i);
-  const lastO = JSON.stringify(properties[0].keyframe.o);
+  const firstI = properties[0].keyframe.i;
+  const firstO = properties[0].keyframe.o;
   for (let i = 1; i < properties.length; i += 1) {
-    if (lastI !== JSON.stringify(properties[i].keyframe.i)
-         || lastO !== JSON.stringify(properties[i].keyframe.o)
+    if (!fastCompare(firstI, properties[i].keyframe.i)
+         || !fastCompare(firstO, properties[i].keyframe.o)
     ) {
       return false;
     }
@@ -74,7 +97,6 @@ const areInterpolationsEqual = (properties) => {
 };
 
 const findRangesOnKeyframes = (properties, withEqualEasing = false) => {
-  // Grouping all properties on a dictionary by keyframe time
   const keyframeNumbers = {};
   properties.forEach((propertyKeyframes, propertyIndex) => {
     for (let i = 0; i < propertyKeyframes.length; i += 1) {
@@ -89,16 +111,12 @@ const findRangesOnKeyframes = (properties, withEqualEasing = false) => {
     }
   });
   const totalProperties = properties.length;
-  // ranges contains all keyframe times of all properties sorted incrementally
   const ranges = Object.keys(keyframeNumbers)
     .sort((a, b) => a - b);
   const finalFrames = new Set();
   for (let i = 0; i < ranges.length - 1; i += 1) {
     const initFrame = parseInt(ranges[i], 10);
     const endFrame = parseInt(ranges[i + 1], 10);
-    // if all properties are animated on the current range
-    // and interpolations are independent or they are all equal
-    // the range is full and can be added
     let isValidRange = false;
     if (!withEqualEasing || areInterpolationsEqual(keyframeNumbers[initFrame])) {
       if (keyframeNumbers[initFrame].length === keyframeNumbers[endFrame].length
@@ -106,8 +124,6 @@ const findRangesOnKeyframes = (properties, withEqualEasing = false) => {
         finalFrames.add(initFrame);
         finalFrames.add(endFrame);
         isValidRange = true;
-        // if properties that don't have a keyframe in this range are not interpolated
-        // the range can be added
       } else if (!findInterpolatingProperties(ranges, keyframeNumbers, i, totalProperties)) {
         finalFrames.add(initFrame);
         finalFrames.add(endFrame);

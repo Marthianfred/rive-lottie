@@ -253,7 +253,6 @@ class LottieVertexProperty extends LottieProperty {
     };
     this._vertices.forEach(
       (vertex) => {
-        // console.log('vertex', vertex.type);
         const vertexValue = this.vertexSolvers[vertex.type](0, vertex, null);
         vertexPoints.v.push(vertexValue.v);
         vertexPoints.i.push(vertexValue.i);
@@ -261,7 +260,7 @@ class LottieVertexProperty extends LottieProperty {
       },
     );
     return {
-      a: 1,
+      a: 0,
       k: vertexPoints,
     };
   }
