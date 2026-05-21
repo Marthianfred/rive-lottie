@@ -27,9 +27,20 @@ async function build(buffer) {
     validateHeader(reader);
     const project = new Project(reader);
     project.searchArtboards();
-    const animations = createAnimations(project);
     const riveFile = riveModule.load(new Uint8Array(buffer));
     const artboard = riveFile.defaultArtboard();
+    const { bounds } = artboard;
+    const w = bounds.maxX - bounds.minX;
+    const h = bounds.maxY - bounds.minY;
+    project.artboards.forEach((a) => {
+      if (a._w === 0) {
+        a._w = w;
+      }
+      if (a._h === 0) {
+        a._h = h;
+      }
+    });
+    const animations = createAnimations(project);
     const animationsData = animations.map((animation, index) => {
       const riveAnimation = artboard.animationByIndex(index);
       const animationInstance = riveModule.loadLinearAnimation(riveAnimation);
